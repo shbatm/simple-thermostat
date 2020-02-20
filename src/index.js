@@ -50,7 +50,7 @@ const ICONS = {
 
 const modeIcons = {
   off: 'hass:power',
-  auto: 'hass:autorenew',
+  auto: 'hass:calendar-repeat',
   heat: 'hass:fire',
   heat_cool: 'hass:autorenew',
   cool: 'hass:snowflake',
@@ -63,7 +63,7 @@ const STATE_ICONS = {
   idle: 'mdi:radiator-disabled',
   heating: 'mdi:radiator',
   cool: 'mdi:snowflake',
-  auto: 'mdi:radiator',
+  auto: 'mdi:calendar-repeat',
 }
 
 const DEFAULT_HIDE = {
@@ -375,6 +375,10 @@ class SimpleThermostat extends LitElement {
       }) || null,
     ].filter(it => it !== null)
 
+    const nameInSensors = html`
+      <div class="sensor-heading sensor-title">${(this.name !== false) ? this.name : ''}</div>
+      `
+
     const stepLayout = this.config.step_layout || 'column'
     const row = stepLayout === 'row'
 
@@ -384,6 +388,7 @@ class SimpleThermostat extends LitElement {
         ${this.renderHeader()}
         <section class="body">
           <div class="sensors">
+            ${(this.config.nameInSensors) ? nameInSensors : ''}
             ${sensorHtml}
           </div>
 
@@ -425,15 +430,17 @@ class SimpleThermostat extends LitElement {
             `
           })}
         </section>
-
-        ${this.modes.map(mode => this.renderModeType(mode))}
+        <div id="info">
+          ${this.modes.map(mode => this.renderModeType(mode))}
+        </div>
+      </div>
       </ha-card>
     `
   }
 
   renderHeader() {
     if (this.name === false) return ''
-
+    if (this._hide.header) return ''
     let icon = this.icon
     const { hvac_action: action } = this.entity.attributes
     if (typeof this.icon === 'object') {
@@ -467,11 +474,17 @@ class SimpleThermostat extends LitElement {
       if (this.modeOptions.names === false) return null
       return this.localize(name, localizePrefix)
     }
-    const maybeRenderIcon = icon => {
+    const maybeRenderIcon = (value, icon) => {
       if (!icon) return null
       if (this.modeOptions.icons === false) return null
       return html`
-        <ha-icon class="mode-icon" .icon=${icon}></ha-icon>
+            <paper-icon-button
+              class="mode-icon"
+              .mode="${value}"
+              .icon="${icon}"
+              @click=${() => this.setMode(type, value)}
+              tabindex="0"
+            ></paper-icon-button>
       `
     }
 
@@ -480,7 +493,7 @@ class SimpleThermostat extends LitElement {
     const { headings } = this.modeOptions
 
     return html`
-      <div class="modes ${headings ? 'heading' : ''}">
+      <div class="modes ${headings ? 'heading' : ''} ${mode}">
         ${headings
           ? html`
               <div class="mode-title">${title}</div>
@@ -492,7 +505,7 @@ class SimpleThermostat extends LitElement {
               class="mode-item ${value === mode ? 'active' : ''}"
               @click=${() => this.setMode(type, value)}
             >
-              ${maybeRenderIcon(icon)} ${maybeRenderName(name)}
+              ${maybeRenderIcon(value, icon)} ${maybeRenderName(name)}
             </div>
           `
         )}
