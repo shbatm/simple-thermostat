@@ -12,16 +12,24 @@ ha-card {
   font-weight: var(--paper-font-body1_-_font-weight);
   line-height: var(--paper-font-body1_-_line-height);
 
-  padding-bottom: calc(var(--st-spacing, var(--st-default-spacing)) * 2);
+  /*padding-bottom: calc(var(--st-spacing, var(--st-default-spacing)) * 2);*/
+  padding-bottom: 0px;
 
+  position: relative;
+  overflow: hidden;
+  --name-font-size: 1.2rem;
+  --brightness-font-size: 1.2rem;
+  --rail-border-color: transparent;
   --auto-color: green;
-  --heat_cool-color: springgreen;
+  --eco-color: springgreen;
   --cool-color: #2b9af9;
   --heat-color: #ff8100;
   --manual-color: #44739e;
   --off-color: #8a8a8a;
   --fan_only-color: #8a8a8a;
   --dry-color: #efbd07;
+  --idle-color: #8a8a8a;
+  --unknown-color: #bac;
 }
 
 ha-card.no-header {
@@ -31,7 +39,9 @@ ha-card.no-header {
 .body {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: auto;
+  /*grid-auto-columns: 1fr;*/
+  grid-template-columns: 2fr 1fr 1fr;
+  margin-bottom: 10px;
   place-items: center;
   padding: 0 calc(var(--st-spacing, var(--st-default-spacing)) * 4);
   padding-bottom: calc(var(--st-spacing, var(--st-default-spacing)) * 2);
@@ -65,7 +75,7 @@ ha-card.no-header {
 
 .sensors {
   display: grid;
-  grid: auto-flow / auto auto;
+  grid: auto-flow / 1fr 1fr;
   grid-gap: var(--st-spacing, var(--st-default-spacing));
   font-size: var(
     --st-font-size-sensors,
@@ -86,6 +96,11 @@ ha-card.no-header {
   align-items: center;
   justify-content: flex-end;
 }
+.sensor-title {
+  grid-column: 1 / 3;
+  font-weight: 600 !important;
+  text-align: left !important;
+}
 .sensors:empty {
   display: none;
 }
@@ -96,6 +111,7 @@ header {
 
   padding: calc(var(--st-spacing, var(--st-default-spacing)) * 6)
     calc(var(--st-spacing, var(--st-default-spacing)) * 4)
+    0
     calc(var(--st-spacing, var(--st-default-spacing)) * 4);
 }
 .header__icon {
@@ -178,8 +194,8 @@ header {
   justify-content: center;
   min-height: 24px;
   padding: var(--st-spacing, var(--st-default-spacing)) 0;
-  background: var(--st-mode-background, var(--secondary-background-color));
-  color: var(--secondary-text-color);
+  /*background: var(--st-mode-background, var(--secondary-background-color));*/
+  color: var(--disabled-text-color);
   cursor: pointer;
   border-radius: var(--st-spacing, var(--st-default-spacing));
 
@@ -189,8 +205,8 @@ header {
 
   &.active,
   &.active:hover {
-    background: var(--st-mode-active-background, var(--primary-color));
-    color: var(--st-mode-active-color, var(--text-primary-color));
+    /*background: var(--st-mode-active-background, var(--primary-color));*/
+    /*color: var(--st-mode-active-color, var(--text-primary-color));*/
   }
 
   &.active.off {
@@ -219,6 +235,48 @@ header {
   --iron-icon-width: 24px;
   --iron-icon-height: 24px;
   display: block;
+}
+.mode-item.active .mode-icon {
+    color: var(--mode-color);
+}
+.auto,
+.heat_cool {
+  --mode-color: var(--auto-color);
+}
+.cool {
+  --mode-color: var(--cool-color);
+}
+.heat {
+  --mode-color: var(--heat-color);
+}
+.manual {
+  --mode-color: var(--manual-color);
+}
+.off {
+  --mode-color: var(--off-color);
+}
+.fan_only {
+  --mode-color: var(--fan_only-color);
+}
+.eco {
+  --mode-color: var(--eco-color);
+}
+.dry {
+  --mode-color: var(--dry-color);
+}
+.idle {
+  --mode-color: var(--idle-color);
+}
+.unknown-mode {
+  --mode-color: var(--unknown-color);
+}
+#info {
+  display: flex-vertical;
+  justify-content: center;
+  text-align: center;
+  padding: 16px 16px 0px 16px;
+  margin-top: -50px;
+  font-size: var(--name-font-size);
 }
 ha-switch {
   padding: 16px 6px;

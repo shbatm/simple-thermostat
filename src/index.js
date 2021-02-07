@@ -55,7 +55,7 @@ const ICONS = {
 }
 
 const MODE_ICONS = {
-  auto: 'hass:autorenew',
+  auto: 'hass:calendar-repeat',
   cool: 'hass:snowflake',
   dry: 'hass:water-percent',
   fan_only: 'hass:fan',
@@ -65,12 +65,12 @@ const MODE_ICONS = {
 }
 
 const STATE_ICONS = {
-  auto: 'mdi:radiator',
-  cooling: 'mdi:snowflake',
   fan: 'mdi:fan',
-  heating: 'mdi:radiator',
-  idle: 'mdi:radiator-disabled',
   off: 'mdi:radiator-off',
+  idle: 'mdi:radiator-disabled',
+  heating: 'mdi:radiator',
+  cool: 'mdi:snowflake',
+  auto: 'mdi:radiator',
 }
 
 const DEFAULT_HIDE = {
@@ -477,8 +477,9 @@ class SimpleThermostat extends LitElement {
                 `
               })}
         </section>
-
-        ${this.modes.map((mode) => this.renderModeType(entity.state, mode))}
+        <div id="info">
+          ${this.modes.map((mode) => this.renderModeType(entity.state, mode))}
+        </div>
       </ha-card>
     `
   }
@@ -524,6 +525,10 @@ class SimpleThermostat extends LitElement {
     } = entity
     const unit = this.getUnit()
 
+    const nameInSensors = html`
+      <div class="sensor-heading sensor-title">${(this.name !== false) ? this.name : ''}</div>
+      `
+
     const sensorHtml = [
       this.renderInfoItem(
         _hide.temperature,
@@ -547,7 +552,7 @@ class SimpleThermostat extends LitElement {
       }) || null,
     ].filter((it) => it !== null)
 
-    return html` <div class="sensors">${sensorHtml}</div> `
+    return html` <div class="sensors">${(this.config.nameInSensors) ? nameInSensors : ''}${sensorHtml}</div> `
   }
 
   renderToggle({ _hide, entity, faults } = this) {
@@ -597,10 +602,18 @@ class SimpleThermostat extends LitElement {
       if (this.modeOptions.names === false) return null
       return this.localize(name, localizePrefix)
     }
-    const maybeRenderIcon = (icon) => {
+    const maybeRenderIcon = (value, icon) => {
       if (!icon) return null
       if (this.modeOptions.icons === false) return null
-      return html` <ha-icon class="mode-icon" .icon=${icon}></ha-icon> `
+      return html`
+            <ha-icon-button
+              class="mode-icon"
+              .mode="${value}"
+              .icon="${icon}"
+              @click=${() => this.setMode(type, value)}
+              tabindex="0"
+            ></ha-icon-button>
+      `
     }
 
     const str = type == 'hvac' ? 'operation' : `${type}_mode`
@@ -608,7 +621,7 @@ class SimpleThermostat extends LitElement {
     const { headings } = this.modeOptions
 
     return html`
-      <div class="modes ${headings ? 'heading' : ''}">
+      <div class="modes ${headings ? 'heading' : ''} ${mode}">
         ${headings ? html` <div class="mode-title">${title}</div> ` : null}
         ${list.map(
           ({ value, icon, name }) => html`
@@ -616,7 +629,7 @@ class SimpleThermostat extends LitElement {
               class="mode-item ${value === mode ? 'active ' + mode : ''}"
               @click=${() => this.setMode(type, value)}
             >
-              ${maybeRenderIcon(icon)} ${maybeRenderName(name)}
+              ${maybeRenderIcon(value, icon)} ${maybeRenderName(name)}
             </div>
           `
         )}
